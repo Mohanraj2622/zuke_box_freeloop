@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>Play Ease</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Logo.png" type="image/png">
+</head>
+<body>
+  <div class="main-container">
+    <div class="player-container">
+      <nav class="head_container">
+        <h3 class="header">Play Ease</h3>
+        <h4 class="Welcome">Zuke Box Playlist</h4>
+      </nav>
+      <div class="spotify-app">
+        <div class="container">
+          <div class="search-bar">
+            <input id="search" type="text" placeholder="Search for a song...">
+          </div>
+          <ul id="trackList" class="track-list">
+            <!-- Tracks will be dynamically added here -->
+          </ul>
+          <!-- Player control -->
+          <div class="player-container modified-player">
+            <div class="player">
+              <button id="fullscreen-btn" class="fullscreen-btn">
+                <i class="fas fa-expand"></i> <!-- Font Awesome Fullscreen Icon -->
+              </button>
+              <div id="cover-container">
+                <img id="cover" src="/api/placeholder/50/50" alt="Album Cover">
+              </div>
+              <h3 id="title">Select a Song</h3>
+              <p id="artist">Artist</p>
+              <div class="progress-bar">
+                <span id="currentTime">0:00</span>
+                <input id="progress" type="range" min="0" max="100" value="0">
+                <span id="duration">0:00</span>
+              </div>
+              <div class="player-controls">
+                <button id="prev" aria-label="Previous Song">⏮</button>
+                <button id="playPause" aria-label="Play/Pause">▶️</button>
+                <button id="next" aria-label="Next Song">⏭</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-menu">
+        <a href="https://mohanraj2622.github.io/FreeLoop/" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="#search" class="menu-item">
+          <i class="fas fa-search"></i>
+          <span>Search</span>
+        </a>
+
+      </div>
+      <!-- jsmediatags Library -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+      <script src="script.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const player = document.querySelector(".modified-player");
+          let fullscreenActive = false;
+          let fullscreenOverlay = null;
+
+          // Cache DOM elements
+          const mainCover = document.getElementById("cover");
+          const mainTitle = document.getElementById("title");
+          const mainArtist = document.getElementById("artist");
+
+          // Create observer to watch for changes in main player
+          const createObserver = (element, callback) => {
+            return new MutationObserver(callback).observe(element, {
+              characterData: true,
+              attributes: true,
+              childList: true,
+              subtree: true
+            });
+          };
+
+          // Update fullscreen content
+          const updateFullscreenContent = () => {
+            if (fullscreenActive && fullscreenOverlay) {
+              const fullscreenCover = fullscreenOverlay.querySelector("#fullscreen-cover");
+              const fullscreenTitle = fullscreenOverlay.querySelector("#fullscreen-title");
+              const fullscreenArtist = fullscreenOverlay.querySelector("#fullscreen-artist");
+
+              if (fullscreenCover) fullscreenCover.src = mainCover.src;
+              if (fullscreenTitle) fullscreenTitle.innerText = mainTitle.innerText;
+              if (fullscreenArtist) fullscreenArtist.innerText = mainArtist.innerText;
+            }
+          };
+
+          // Set up observers for main player elements
+          createObserver(mainCover, updateFullscreenContent);
+          createObserver(mainTitle, updateFullscreenContent);
+          createObserver(mainArtist, updateFullscreenContent);
+
+          // Fullscreen button functionality
+          const fullscreenBtn = document.getElementById("fullscreen-btn");
+          fullscreenBtn.addEventListener("click", function () {
+            if (!fullscreenActive) {
+              openFullscreenPlayer();
+            }
+          });
+
+          function openFullscreenPlayer() {
+            fullscreenActive = true;
+            fullscreenOverlay = document.createElement("div");
+            fullscreenOverlay.classList.add("fullscreen-player");
+
+            fullscreenOverlay.innerHTML = `
+          <div class="controls">
+          <button class="close-btn" id="closeFullscreen">
+          <i class='fas fa-compress-arrows-alt'></i>
+          </button>
+         </div>
+         <div class="song-info">
+         <div id="cover-container">
+          <img id="fullscreen-cover" src="${mainCover.src}" alt="Album Cover">
+          </div>
+         <h3 id="fullscreen-title">${mainTitle.innerText}</h3>
+         <p id="fullscreen-artist">${mainArtist.innerText}</p>
+          </div>
+          `;
+            document.body.appendChild(fullscreenOverlay);
+            // Close fullscreen event
+            document.getElementById("closeFullscreen").addEventListener("click", closeFullscreenPlayer);
+          }
+          
+          function closeFullscreenPlayer() {
+            fullscreenActive = false;
+            if (fullscreenOverlay) {
+              fullscreenOverlay.remove();
+              fullscreenOverlay = null;
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+</body>
+</html>
